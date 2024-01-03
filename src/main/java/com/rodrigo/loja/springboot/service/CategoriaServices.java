@@ -1,5 +1,8 @@
 package com.rodrigo.loja.springboot.service;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
@@ -7,6 +10,7 @@ import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.rodrigo.loja.springboot.controller.CategoriaController;
 import com.rodrigo.loja.springboot.exceptions.ResourceNotFoundException;
 import com.rodrigo.loja.springboot.mapper.DozerMapper;
 import com.rodrigo.loja.springboot.model.Categoria;
@@ -24,6 +28,7 @@ public class CategoriaServices {
 	public List<CategoriaVO> findAll() {
 		logger.info("Finding all people");
 		var categorias =  DozerMapper.parseListObject(repository.findAll(), CategoriaVO.class);
+		categorias.stream().forEach(c-> c.add(linkTo(methodOn(CategoriaController.class).findById(c.getKey())).withSelfRel()));
 		return categorias;
 	}
 	
@@ -32,6 +37,7 @@ public class CategoriaServices {
 		
 		var entity = repository.findById(id).orElseThrow(()-> new ResourceNotFoundException("No records Found for this Id"));
 		var vo = DozerMapper.parseObject(entity, CategoriaVO.class);
+		vo.add(linkTo(methodOn(CategoriaController.class).findAll()).withSelfRel());
 		return vo;
 	}
 	
@@ -40,6 +46,7 @@ public class CategoriaServices {
 		categoria.setDateCreation(new Date());
 		var entity = DozerMapper.parseObject(categoria, Categoria.class);
 		var vo = DozerMapper.parseObject(repository.save(entity), CategoriaVO.class);
+		vo.add(linkTo(methodOn(CategoriaController.class).findById(categoria.getKey())).withSelfRel());
 		return vo;
 	}
 	
@@ -50,6 +57,7 @@ public class CategoriaServices {
 		entity.setDateCreation(categoria.getDateCreation());
 		entity.setDateUpdate(new Date());
 		var vo = DozerMapper.parseObject(repository.saveAndFlush(entity), CategoriaVO.class);
+		vo.add(linkTo(methodOn(CategoriaController.class).findById(categoria.getKey())).withSelfRel());
 		return vo;
 	}
 	

@@ -1,5 +1,8 @@
 package com.rodrigo.loja.springboot.service;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
@@ -7,6 +10,7 @@ import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.rodrigo.loja.springboot.controller.CidadeController;
 import com.rodrigo.loja.springboot.exceptions.ResourceNotFoundException;
 import com.rodrigo.loja.springboot.mapper.DozerMapper;
 import com.rodrigo.loja.springboot.model.Cidade;
@@ -24,6 +28,7 @@ public class CidadeServices {
 	public List<CidadeVO> findAll() {
 		logger.info("Finding all people");
 		var cidades =  DozerMapper.parseListObject(repository.findAll(), CidadeVO.class);
+		cidades.stream().forEach(c-> c.add(linkTo(methodOn(CidadeController.class).findById(c.getKey())).withSelfRel()));
 		return cidades;
 	}
 	
@@ -32,6 +37,7 @@ public class CidadeServices {
 		
 		var entity = repository.findById(id).orElseThrow(()-> new ResourceNotFoundException("No records Found for this Id"));
 		var vo = DozerMapper.parseObject(entity, CidadeVO.class);
+		vo.add(linkTo(methodOn(CidadeController.class).findAll()).withSelfRel());
 		return vo;
 	}
 	
@@ -40,6 +46,7 @@ public class CidadeServices {
 		cidade.setDateCreation(new Date());
 		var entity = DozerMapper.parseObject(cidade, Cidade.class);
 		var vo = DozerMapper.parseObject(repository.save(entity), CidadeVO.class);
+		vo.add(linkTo(methodOn(CidadeController.class).findById(cidade.getKey())).withSelfRel());
 		return vo;
 	}
 	
@@ -50,6 +57,7 @@ public class CidadeServices {
 		entity.setDateCreation(cidade.getDateCreation());
 		entity.setDateUpdate(new Date());
 		var vo = DozerMapper.parseObject(repository.saveAndFlush(entity), CidadeVO.class);
+		vo.add(linkTo(methodOn(CidadeController.class).findById(cidade.getKey())).withSelfRel());
 		return vo;
 	}
 	

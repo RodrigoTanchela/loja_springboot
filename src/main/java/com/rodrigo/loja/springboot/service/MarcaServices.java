@@ -1,5 +1,8 @@
 package com.rodrigo.loja.springboot.service;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
@@ -7,6 +10,7 @@ import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.rodrigo.loja.springboot.controller.MarcaController;
 import com.rodrigo.loja.springboot.exceptions.ResourceNotFoundException;
 import com.rodrigo.loja.springboot.mapper.DozerMapper;
 import com.rodrigo.loja.springboot.model.Marca;
@@ -24,6 +28,7 @@ private Logger logger = Logger.getLogger(MarcaServices.class.getName());
 	public List<MarcaVO> findAll() {
 		logger.info("Finding all people");
 		var marcas =  DozerMapper.parseListObject(repository.findAll(), MarcaVO.class);
+		marcas.stream().forEach(c-> c.add(linkTo(methodOn(MarcaController.class).findById(c.getKey())).withSelfRel()));
 		return marcas;
 	}
 	
@@ -32,6 +37,7 @@ private Logger logger = Logger.getLogger(MarcaServices.class.getName());
 		
 		var entity = repository.findById(id).orElseThrow(()-> new ResourceNotFoundException("No records Found for this Id"));
 		var vo = DozerMapper.parseObject(entity, MarcaVO.class);
+		vo.add(linkTo(methodOn(MarcaController.class).findAll()).withSelfRel());
 		return vo;
 	}
 	
@@ -40,6 +46,7 @@ private Logger logger = Logger.getLogger(MarcaServices.class.getName());
 		marca.setDateCreation(new Date());
 		var entity = DozerMapper.parseObject(marca, Marca.class);
 		var vo = DozerMapper.parseObject(repository.save(entity), MarcaVO.class);
+		vo.add(linkTo(methodOn(MarcaController.class).findById(marca.getKey())).withSelfRel());
 		return vo;
 	}
 	
@@ -50,6 +57,7 @@ private Logger logger = Logger.getLogger(MarcaServices.class.getName());
 		entity.setDateCreation(marca.getDateCreation());
 		entity.setDateUpdate(new Date());
 		var vo = DozerMapper.parseObject(repository.saveAndFlush(entity), MarcaVO.class);
+		vo.add(linkTo(methodOn(MarcaController.class).findById(marca.getKey())).withSelfRel());
 		return vo;
 	}
 	

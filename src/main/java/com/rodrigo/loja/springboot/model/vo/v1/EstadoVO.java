@@ -4,10 +4,12 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.Objects;
 
+import org.springframework.hateoas.RepresentationModel;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.dozermapper.core.Mapping;
 
-public class EstadoVO implements Serializable {
+public class EstadoVO extends RepresentationModel<EstadoVO> implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
